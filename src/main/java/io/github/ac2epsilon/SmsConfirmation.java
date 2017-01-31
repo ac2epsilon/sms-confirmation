@@ -20,9 +20,12 @@ import static java.lang.System.exit;
 
 /**
  * Created by ac2 on 25.01.17.
- */
+ *
+ * @author  Arsenii Chebotarov
+ * @version 1.0
+  */
 public class SmsConfirmation {
-    BdbTools bdb = new BdbTools();
+    BdbTools bdb;
 
     private final String BASE_URL = "https://rest.nexmo.com/sms/json";
     private String company;
@@ -31,11 +34,13 @@ public class SmsConfirmation {
     private String defaultMessage = "Your confirmation code: ~";
 
     /**
+     *
      * Check error condition and exit with system code 1 if it is true
      *
      * @param condition Condition to check
      * @param message Error message to print out
      * @param usage Common usage instructions
+     *
      */
     static private void ifErrorExit(boolean condition, String message, String usage) {
         if (condition) {
@@ -45,8 +50,11 @@ public class SmsConfirmation {
         }
     };
     /**
-     * main() method, to make easy check of functionality in Gopher-like style
+     *
+     * Static main method, to make easy check functionality in terminal menu driven style
+     *
      * @param args Command-line parameters
+     *
      */
     public static void main (String[] args) {
         Pattern hex16 = Pattern.compile("[0-9a-f]{16}");
@@ -99,35 +107,50 @@ public class SmsConfirmation {
     }}
 
     /**
-     * Constructor accepts three parameters, needed to use
-     * @param company Override mailFrom field constructor
-     *
+     * Constructor accepts three parameters
+     * @param company Serves as "namespace" to divide all confirmations by domains, also used in as part of hash
+     *                and also mentioned as From: field for sent SMS
+     * @param apiKey API_KEY provided by nexmo.com
+     * @param apiSecret API_SECRET provided by nexmo.com
      */
     SmsConfirmation(String company, String apiKey, String apiSecret) {
         this.company = company;
         this.apiKey = apiKey;
         this.apiSecret = apiSecret;
+// we use company name to divide records in separate "namespaces"
+        this.bdb = new BdbTools(company);
     }
     /**
-     *
-     * @param userPhone Phone number where you can
-     * @return 4-digit confirmation code
+     * @param userPhone Phone number where you send confirmation code
+     * @return 4-digit confirmation code. Any other
      */
     String send(String userPhone) {
         return send(userPhone, defaultMessage);
     }
+    /**
+     * @param userPhone Phone number where you send confirmation code
+     * @param message Optional user defined message. Message should contain ~ sign, which will be replaced
+     * with 4-digit code, or IllegalArgumentException will rise.
+     * @return 4-digit confirmation code as String. Any other return have to be treated as fail
+     * @throws IllegalArgumentException Exception will throw
+     */
     String send(String userPhone, String message) {
+        if (message.indexOf('~')<0) {
+            throw new IllegalArgumentException("SMS message should include ~ sign");
+        }
         Character kind = SmsUtil.detectType(userPhone);
-        String code = "fail";
+        String code = "fail"; // generally speaking any non-4-digit return have to be treated as fail
         if (kind.equals('P')) {
             code = sendSms(userPhone, message);
             /* Confirmation confirmation = */ bdb.add(userPhone, code);
+        } else {
+            throw new IllegalArgumentException("Provided phone number not confirms with our rules");
         }
         return code;
     }
 
     /**
-     * Check if given 4-digit code equals to generated and stored one
+     * Check if provided 4-digit code equals to generated and stored one
      * @param userPhone Phone to make check
      * @param code Given code, which will be checked
      * @return Hash code, which represents phone-code-time_of_check. Once code is checked

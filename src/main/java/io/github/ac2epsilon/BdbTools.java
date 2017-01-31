@@ -1,10 +1,7 @@
 package io.github.ac2epsilon;
 
 import com.sleepycat.je.*;
-import com.sleepycat.persist.EntityCursor;
-import com.sleepycat.persist.EntityStore;
-import com.sleepycat.persist.PrimaryIndex;
-import com.sleepycat.persist.StoreConfig;
+import com.sleepycat.persist.*;
 import com.sleepycat.je.DatabaseException;
 
 import java.io.File;
@@ -20,13 +17,16 @@ public class BdbTools {
     Environment env;
     EntityStore store;
     PrimaryIndex<String,Confirmation> idx;
+    SecondaryIndex<String, String, Confirmation> hashIdx;
 
     /**
      * Constructs BerkeleyDB objects to store Confirmation entities
      *
+     * @param namespace Something to divide DB on "namespaces", company name to serve several parties
      * @return Object to store and retrieve Confirmation entities
+     *
      */
-    BdbTools() {
+    BdbTools(String namespace) {
         envCfg = new EnvironmentConfig();
         envCfg.setAllowCreate(true);
         envCfg.setTransactional(true);
@@ -40,8 +40,9 @@ public class BdbTools {
             File dataDir = new File("./dbEnv");
             if (!dataDir.exists()) dataDir.mkdir();
             env = new Environment(dataDir, envCfg);
-            store = new EntityStore(env, "EntityStore", storeCfg);
+            store = new EntityStore(env, namespace, storeCfg);
             idx = store.getPrimaryIndex(String.class, Confirmation.class);
+            hashIdx = store.getSecondaryIndex(idx, String.class, "keyByHash");
         } catch (DatabaseException dbe) { dbe.printStackTrace(); }
     }
 
@@ -72,11 +73,28 @@ public class BdbTools {
     /**
      * Returns Confirmation by UserId
      *
-     * @param userId Returns Confirmation from DB by UserId
+     * @param userId Confirmation userId to be retrieved
      * @return Asked Confirmation or null, if given key is not exist in DB
+     * @throws IllegalArgumentException
      */
     Confirmation get(String userId)  {
+        if (userId==null || userId.length()==0) {
+            throw new IllegalArgumentException("You can not ask for null userId");
+        }
         return idx.get(userId);
+    }
+
+    /**
+     * Returns Confirmation by hash
+     *
+     * @param hash Confirmation hash value to be retrieved, can not be null
+     * @return Asked Confirmation or null, if given key is not exist in DB
+     */
+    Confirmation getByHash(String hash) {
+        if (hash==null || hash.length()==0) {
+            throw new IllegalArgumentException("You can not ask for null hash");
+        }
+        return hashIdx.get(hash);
     }
 
     /**
@@ -100,7 +118,7 @@ public class BdbTools {
 
     }
     /**
-     * Iterates over DB and calls
+     * Iterates over DB and calls supplied callback function for every item
      *
      * @param callback Functional snippet to call for every Confirmation in DB
      */

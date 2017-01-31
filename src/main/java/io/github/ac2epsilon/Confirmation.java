@@ -2,6 +2,8 @@ package io.github.ac2epsilon;
 
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
+import com.sleepycat.persist.model.Relationship;
+import com.sleepycat.persist.model.SecondaryKey;
 
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
@@ -21,12 +23,24 @@ public class Confirmation {
     String id;
     String code;
     String issued;
+    @SecondaryKey(relate = Relationship.ONE_TO_ONE)
     String hash;
 
+    /**
+     * Default constructor as needed for Berkley DB JE requirements, not to be used in code
+     */
     public Confirmation() {
 
     }
 
+    /**
+     * Constructor to use in code
+     *
+     * @param _id Actually id stands for phone number, but we want no more then one unique request for one
+     *            number, with rewriting, so using phone as id fulfills our needs
+     * @param _code Last 4-digit confirmation code, sent to given phone. While not confirmed record will be rewritten
+     *              by any following request, to keep only one open confirmation request for given number
+     */
     public Confirmation(String _id, String _code) {
         id = _id;
         code=_code;
