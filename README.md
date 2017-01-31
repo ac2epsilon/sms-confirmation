@@ -1,5 +1,7 @@
-SMS-confirmation library to wrap Nexmo.com sms service.
+SMS-confirmation library
 ======
+ Wraps Nexmo.com sms service
+------
 First you have to register at nexmo.com, or modify code to use other provider.
 Finally you should obtain two hex numbers: 8-hex-digit API_KEY and 16-hex-digit API_SECRET.
 
