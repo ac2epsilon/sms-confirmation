@@ -144,7 +144,7 @@ public class SmsConfirmation {
             code = sendSms(userPhone, message);
             /* Confirmation confirmation = */ bdb.add(userPhone, code);
         } else {
-            throw new IllegalArgumentException("Provided phone number not confirms with our rules");
+            throw new IllegalArgumentException("Provided phone number not confirms API rules");
         }
         return code;
     }
@@ -157,7 +157,7 @@ public class SmsConfirmation {
      * this hash will remain constant, so can be used as reference or Primary Key for user
      */
     String check(String userPhone, String code) {
-        String result = "false";
+        String result = "fail";
         Confirmation saved =  bdb.get(userPhone);
         if (saved!=null && saved.code.equals(code)) {
             if (saved.hash==null) {
