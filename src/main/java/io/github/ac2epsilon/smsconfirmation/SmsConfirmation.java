@@ -113,7 +113,7 @@ public class SmsConfirmation {
      * @param apiKey API_KEY provided by nexmo.com
      * @param apiSecret API_SECRET provided by nexmo.com
      */
-    SmsConfirmation(String company, String apiKey, String apiSecret) {
+    public SmsConfirmation(String company, String apiKey, String apiSecret) {
         this.company = company;
         this.apiKey = apiKey;
         this.apiSecret = apiSecret;
@@ -124,7 +124,7 @@ public class SmsConfirmation {
      * @param userPhone Phone number where you send confirmation code
      * @return 4-digit confirmation code. Any other
      */
-    String send(String userPhone) {
+    public String send(String userPhone) {
         return send(userPhone, defaultMessage);
     }
     /**
@@ -134,7 +134,7 @@ public class SmsConfirmation {
      * @return 4-digit confirmation code as String. Any other return have to be treated as fail
      * @throws IllegalArgumentException Exception will throw
      */
-    String send(String userPhone, String message) {
+    public String send(String userPhone, String message) {
         if (message.indexOf('~')<0) {
             throw new IllegalArgumentException("SMS message should include ~ sign");
         }
@@ -156,7 +156,7 @@ public class SmsConfirmation {
      * @return Hash code, which represents phone-code-time_of_check. Once code is checked
      * this hash will remain constant, so can be used as reference or Primary Key for user
      */
-    String check(String userPhone, String code) {
+    public String check(String userPhone, String code) {
         String result = "fail";
         Confirmation saved =  bdb.get(userPhone);
         if (saved!=null && saved.code.equals(code)) {
