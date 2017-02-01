@@ -1,4 +1,4 @@
-package io.github.ac2epsilon;
+package io.github.ac2epsilon.smsconfirmation;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;

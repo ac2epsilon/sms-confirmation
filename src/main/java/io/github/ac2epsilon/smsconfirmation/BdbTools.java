@@ -1,4 +1,4 @@
-package io.github.ac2epsilon;
+package io.github.ac2epsilon.smsconfirmation;
 
 import com.sleepycat.je.*;
 import com.sleepycat.persist.*;
@@ -23,10 +23,8 @@ public class BdbTools {
      * Constructs BerkeleyDB objects to store Confirmation entities
      *
      * @param namespace Something to divide DB on "namespaces", company name to serve several parties
-     * @return Object to store and retrieve Confirmation entities
-     *
      */
-    BdbTools(String namespace) {
+    public BdbTools(String namespace) {
         envCfg = new EnvironmentConfig();
         envCfg.setAllowCreate(true);
         envCfg.setTransactional(true);
@@ -55,7 +53,7 @@ public class BdbTools {
      * @param code 4-digit code, sent to phone, mentioned above
      * @return Confirmation entity, stored in DB
      */
-    Confirmation add(String phone, String code) {
+    public Confirmation add(String phone, String code) {
         Confirmation confirmation = new Confirmation(phone, code);
         idx.put(null, confirmation, Put.OVERWRITE, wo.setTTL(1)); /* one day */
         return confirmation;
@@ -66,7 +64,7 @@ public class BdbTools {
      *
      * @param confirmation Confirmation object will be persisted removing TTL
      */
-    void putNoTTL(Confirmation confirmation) {
+    public void putNoTTL(Confirmation confirmation) {
         idx.put(null, confirmation, Put.OVERWRITE, wo.setTTL(0).setUpdateTTL(true));
     }
 
@@ -75,9 +73,8 @@ public class BdbTools {
      *
      * @param userId Confirmation userId to be retrieved
      * @return Asked Confirmation or null, if given key is not exist in DB
-     * @throws IllegalArgumentException
      */
-    Confirmation get(String userId)  {
+    public Confirmation get(String userId)  {
         if (userId==null || userId.length()==0) {
             throw new IllegalArgumentException("You can not ask for null userId");
         }
@@ -100,7 +97,7 @@ public class BdbTools {
     /**
      * Closes BerkekeyDB (effectivelly stopping working threads)
      */
-    void close() {
+    public void close() {
         if (store!=null) store.close();
         if (env!=null) env.close();
     }
@@ -111,7 +108,7 @@ public class BdbTools {
      * @param userId User (given as phone number) to delete
      * @return Confirmation of removed record (not persisted any more)
      */
-    Confirmation delete(String userId) {
+    public Confirmation delete(String userId) {
         Confirmation result = get(userId);
         if (result!=null) idx.delete(userId);
         return result;
@@ -122,18 +119,11 @@ public class BdbTools {
      *
      * @param callback Functional snippet to call for every Confirmation in DB
      */
-    void iterate(ConfirmationLambda callback) {
+    public void iterate(ConfirmationLambda callback) {
         EntityCursor<Confirmation> pi_cursor = idx.entities();
         try {
             Iterator<Confirmation> it = pi_cursor.iterator();
             while (it.hasNext()) callback.run(it.next());
         } finally { pi_cursor.close(); }
     }
-}
-
-/**
- * Supporting interface to make functional calls in iterate()
- */
-interface ConfirmationLambda {
-    void run(Confirmation confirmation);
 }

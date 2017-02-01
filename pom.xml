@@ -10,9 +10,10 @@
     <packaging>jar</packaging>
 
     <name>${project.groupId}:${project.artifactId}</name>
-    <description>Sms-confirmation built on top of Nixmo sms service to send 4-digit confirmation codes and track them
-        back for confirmation. Finally it generates SHA-1 code as function of phone+code+date-of-confirmation.
-        Additionally there is a means to provide "namespaces", which make possible divide request for different parties.
+    <description>Sms-confirmation built on top of Nixmo sms service to send 4-digit confirmation codes and track
+        them back for confirmation. Finally it generates SHA-1 code as function of phone+code+date-of-confirmation.
+        Additionally there is a means to provide "namespaces", which make possible divide request for different
+        parties.
     </description>
     <url>https://github.com/ac2epsilon/sms-confirmation</url>
 
@@ -86,9 +87,15 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
+                            <minimizeJar>true</minimizeJar>
+                            <artifactSet>
+                                <includes>
+                                    <include>com.sleepycat:je</include>
+                                </includes>
+                            </artifactSet>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>io.github.ac2epsilon.SmsConfirmation</mainClass>
+                                    <mainClass>io.github.ac2epsilon.smsconfirmation.SmsConfirmation</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>

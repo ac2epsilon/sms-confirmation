@@ -1,4 +1,4 @@
-package io.github.ac2epsilon;
+package io.github.ac2epsilon.smsconfirmation;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -15,7 +15,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import static io.github.ac2epsilon.SmsUtil.getVerificationToken;
+import static io.github.ac2epsilon.smsconfirmation.SmsUtil.getVerificationToken;
 import static java.lang.System.exit;
 
 /**
@@ -25,7 +25,7 @@ import static java.lang.System.exit;
  * @version 1.0
   */
 public class SmsConfirmation {
-    BdbTools bdb;
+    public BdbTools bdb;
 
     private final String BASE_URL = "https://rest.nexmo.com/sms/json";
     private String company;

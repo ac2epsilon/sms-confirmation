@@ -8,7 +8,7 @@ Finally you should obtain two hex numbers: 8-hex-digit API_KEY and 16-hex-digit 
 Usage:
 ------
 
-1. Add ossrh SHAPSHOT repository to yous pom.xml file:
+1. Add ossrh SHAPSHOT repository and dependency to yous pom.xml file:
 
 ```xml
      <repositories>
@@ -20,6 +20,9 @@ Usage:
              </url>
          </repository>
      </repositories>
+     ...
+
+
 ```
 2. Import package
 ```java

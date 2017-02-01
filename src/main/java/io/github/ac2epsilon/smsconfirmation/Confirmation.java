@@ -1,4 +1,4 @@
-package io.github.ac2epsilon;
+package io.github.ac2epsilon.smsconfirmation;
 
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
@@ -23,7 +23,7 @@ public class Confirmation {
     String id;
     String code;
     String issued;
-    @SecondaryKey(relate = Relationship.ONE_TO_ONE)
+    @SecondaryKey(relate = Relationship.ONE_TO_ONE, name = "keyByHash")
     String hash;
 
     /**

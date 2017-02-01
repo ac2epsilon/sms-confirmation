@@ -1,4 +1,4 @@
-package io.github.ac2epsilon;
+package io.github.ac2epsilon.smsconfirmation;
 
 /**
  * Created by ac2 on 25.01.17.
