@@ -8,7 +8,7 @@ Finally you should obtain two hex numbers: 8-hex-digit API_KEY and 16-hex-digit 
 Usage:
 ------
 
-1. Add ossrh SHAPSHOT repository and dependency to yous pom.xml file:
+0. Add ossrh SHAPSHOT repository and dependency to yous pom.xml file:
 
 ```xml
      <repositories>
@@ -22,6 +22,13 @@ Usage:
      </repositories>
      ...
 
+1. Add dependency:
+
+      <dependency>
+        <groupId>io.github.ac2epsilon</groupId>
+        <artifactId>sms-confirmation</artifactId>
+        <version>1.0-SNAPSHOT</version>
+      </dependency>
 
 ```
 2. Import package
