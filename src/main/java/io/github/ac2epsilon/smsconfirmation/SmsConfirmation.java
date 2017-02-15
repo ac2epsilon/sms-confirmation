@@ -6,13 +6,11 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.message.BasicNameValuePair;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Scanner;
 import java.util.regex.Pattern;
 
 import static io.github.ac2epsilon.smsconfirmation.SmsUtil.getVerificationToken;
@@ -75,17 +73,19 @@ public class SmsConfirmation {
             System.out.print("> ");
             String line = null;
             try { line = br.readLine(); } catch (IOException e) {}
-            if (line.length()==0) line="h";
+            if (line.length()==0) line="*";
 
             String[] t = line.split(" ");
             switch (t[0].charAt(0)) {
                 case 'q': exitCondition = true;
+                    break;
                 case 'r':
                     if (t.length > 1) {
                         String phone = t[1];
                         String code = sms.send(phone);
                         System.out.println(code);
-                    } else System.out.println("You have to specify arguments");
+                        System.out.println("If code is not four digits, it will be ignored!");
+                    } else System.out.println("You have to specify arguments for R");
                     break;
                 case 'c':
                     if (t.length > 2) {
@@ -93,7 +93,14 @@ public class SmsConfirmation {
                         String code = t[2];
                         String hash = sms.check(phone, code);
                         System.out.println(hash);
-                    } else System.out.println("You have to specify arguments");
+                    } else System.out.println("You have to specify arguments for C");
+                    break;
+                case 'h':
+                    if (t.length > 1) {
+                        String hash = t[1];
+                        String re = sms.reHash(hash);
+                        System.out.println(re);
+                    } else System.out.println("You have to specify arguments for H");
                     break;
                 case 'l':
                     sms.bdb.iterate(c -> System.out.println(c));
@@ -101,7 +108,8 @@ public class SmsConfirmation {
                 default:
                     System.out.println(
         "Commands:\nq - quit from app\nr <phone> - request new random 4-digit confirmation code\n"+
-        "c <phone> <code> - check code validity\nl - list pending and confirmed recorded requests"
+        "c <phone> <code> - check code validity\nh - return sign by hash\n"+
+        "l - list pending and confirmed recorded requests"
                     );
         }
     }}
@@ -139,13 +147,14 @@ public class SmsConfirmation {
             throw new IllegalArgumentException("SMS message should include ~ sign");
         }
         Character kind = SmsUtil.detectType(userPhone);
-        String code = "fail"; // generally speaking any non-4-digit return have to be treated as fail
+        String code; // any non-4-digit return have to be treated as fail
         if (kind.equals('P')) {
             code = sendSms(userPhone, message);
+            if (code.length()==4 && Pattern.compile("^[0-9]{4}$").matcher(code).matches()) {
             /* Confirmation confirmation = */ bdb.add(userPhone, code);
-        } else {
+            }
+        } else
             throw new IllegalArgumentException("Provided phone number not confirms API rules");
-        }
         return code;
     }
 
@@ -167,6 +176,15 @@ public class SmsConfirmation {
             result =  saved.hash;
         }
         return result;
+    }
+
+    public String reHash(String hash) {
+       String result = null;
+       Confirmation confirmation = bdb.getByHash(hash);
+       if (confirmation!=null) {
+         result = confirmation.getSign();
+       }
+       return result;
     }
 
     /**
@@ -197,11 +215,22 @@ public class SmsConfirmation {
               .getNewHttpClient()
               .execute(method);
           int status = httpResponse.getStatusLine().getStatusCode();
-          if (status != 200)
-            throw new Exception("Non-200 response ["+status+"] from Nexmo-HTTPS");
-          new BasicResponseHandler().handleResponse(httpResponse);
-        } catch (Exception e) { method.abort(); }
-
+          InputStream is = httpResponse.getEntity().getContent();
+          java.util.Scanner s = new Scanner(is).useDelimiter("\\A");
+          String result = s.hasNext() ? s.next() : "";
+          if (status != 200) {
+              throw new SmsException("Non-200 response [" + status + "] from Nexmo-HTTPS");
+          }
+          if (!result.contains("\"status\": \"0\"")) {
+              throw new SmsException(result);
+          }
+//          new BasicResponseHandler().handleResponse(httpResponse);
+        } catch (IOException e) {
+// System.out.println(e.getMessage());
+            method.abort();
+        } catch (SmsException se) {
+            return se.getMessage();
+        }
         return code;
     }
 }

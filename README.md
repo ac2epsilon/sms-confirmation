@@ -42,7 +42,7 @@ import io.github.ac2epsilon
 First parameter _company_ used as "namespace", so you can serve several projects/companies/parties.
 API_KEY and API_SECRET are values, provided by Nexmo.com during your registration.
 
- 4. Call _send_ method:
+4. Call _send_ method:
 ```java
     String code = sms.send("380639003365");
 ```
@@ -77,3 +77,12 @@ as function of phone+code+datetime-of-confirmation. So you can back track confir
 
 Once confirmation complete record will persist in DB forever and stay immutable. Further valid
 conformations will not affect date of confirmation, so resulting hash will be unchanged.
+
+6. You may retrieve data about confirmation calling method _reHash_:
+
+```java
+    String re = sms.reHash(hash);
+```
+
+Returning string will contain phone number, 4-digit code and date/time as formatted string, all separated by minus
+sign. SHA-1 of this string will yield given hash code.

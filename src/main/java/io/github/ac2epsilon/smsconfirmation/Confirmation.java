@@ -62,12 +62,24 @@ public class Confirmation {
  * */
     public void setTokenHash() {
         issued = SmsUtil.timestamp();
-        String sign = id+"-"+ code+"-"+issued;
+        String sign = getSign();
         byte[] m= {};
         try {
             m = MessageDigest.getInstance("SHA-1").digest(sign.getBytes("UTF-8"));
         } catch (NoSuchAlgorithmException e) {} catch (UnsupportedEncodingException e) {}
         hash = bytesToHex(m);
+    }
+
+    /**
+     * Compose hash key value
+     *
+     * @return Key to form hash
+     */
+    public String getSign() {
+        if (issued!=null)
+            return id+"-"+ code+"-"+issued;
+        else
+            return id+"-"+ code;
     }
     @Override
     public String toString() {
