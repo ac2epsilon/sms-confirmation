@@ -46,7 +46,8 @@ public class SmsConfirmation {
             System.out.println(usage);
             exit(1);
         }
-    };
+    }
+
     /**
      *
      * Static main method, to make easy check functionality in terminal menu driven style
